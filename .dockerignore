@@ -1,0 +1,8 @@
+.git
+.env
+.terraform
+terraform.tfstate*
+*.tfvars
+__pycache__
+*.pyc
+monitoring/data

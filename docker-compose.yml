@@ -1,0 +1,37 @@
+services:
+  app:
+    build: .
+    image: ponto-falante:local
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ["127.0.0.1:8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    restart: unless-stopped
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--web.enable-lifecycle"]
+    volumes: ["./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro", "./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro", "prometheus_data:/prometheus"]
+    ports: ["127.0.0.1:9090:9090"]
+    depends_on: [app]
+  grafana:
+    image: grafana/grafana:11.5.2
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:?Configure GRAFANA_USER no arquivo .env}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Configure GRAFANA_PASSWORD no arquivo .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [prometheus]
+volumes:
+  prometheus_data:
+  grafana_data:

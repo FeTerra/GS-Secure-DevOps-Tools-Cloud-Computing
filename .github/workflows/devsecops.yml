@@ -1,0 +1,63 @@
+name: DevSecOps
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  security-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Procurar segredos
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Análise estática Semgrep
+        run: docker run --rm --volume "$PWD:/src" --workdir /src semgrep/semgrep semgrep scan --config p/default --error .
+      - name: Configurar Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build da imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ponto-falante:${{ github.sha }}
+      - name: Scan de vulnerabilidades Trivy
+        uses: aquasecurity/trivy-action@0.36.0
+        with:
+          image-ref: ponto-falante:${{ github.sha }}
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+      - name: Publicar no GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}:latest
+      - name: Assumir role AWS via OIDC
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Atualizar instância por AWS Systems Manager
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+        env:
+          INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          IMAGE: ghcr.io/${{ github.repository }}:${{ github.sha }}
+        run: |
+          command_id=$(aws ssm send-command --instance-ids "$INSTANCE_ID" --document-name AWS-RunShellScript --parameters commands="set -e; docker pull $IMAGE; docker rm -f ponto-falante || true; docker run -d --name ponto-falante --restart unless-stopped -p 80:8000 $IMAGE" --query 'Command.CommandId' --output text)
+          aws ssm wait command-executed --command-id "$command_id" --instance-id "$INSTANCE_ID"

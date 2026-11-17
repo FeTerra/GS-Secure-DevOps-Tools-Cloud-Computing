@@ -1,0 +1,46 @@
+{
+  "uid": "ponto-falante-ouro",
+  "title": "Ponto Falante - Sinais de Ouro",
+  "tags": ["citizentech", "devops"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Disponibilidade do alvo",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "up{job=\"ponto-falante\"}", "legendFormat": "up" }],
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "min": 0, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": 0 }, { "color": "green", "value": 1 }] } }, "overrides": [] }
+    },
+    {
+      "id": 2,
+      "title": "Requisições por segundo",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(rate(http_requests_total[5m]))", "legendFormat": "req/s" }],
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 }
+    },
+    {
+      "id": 3,
+      "title": "Taxa de erros HTTP",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total[5m])), 0.001)", "legendFormat": "5xx / total" }],
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] }
+    },
+    {
+      "id": 4,
+      "title": "Latência p95",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95" }],
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    }
+  ]
+}

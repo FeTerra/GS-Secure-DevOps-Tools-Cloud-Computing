@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+dnf update -y
+dnf install -y docker
+systemctl enable --now docker
+docker pull ${image_uri}
+docker run -d --name ponto-falante --restart unless-stopped -p 80:8000 ${image_uri}
