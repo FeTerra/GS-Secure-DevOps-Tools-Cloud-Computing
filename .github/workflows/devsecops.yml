@@ -7,6 +7,26 @@ on:
 permissions:
   contents: read
 jobs:
+  terraform-validate:
+    name: Validar infraestrutura Terraform
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configurar Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.1
+          terraform_wrapper: false
+      - name: Verificar formatação
+        run: terraform fmt -check -recursive
+      - name: Inicializar provider sem backend
+        run: terraform init -backend=false -input=false
+      - name: Validar configuração
+        run: terraform validate -no-color
+
   security-build:
     runs-on: ubuntu-latest
     permissions:
