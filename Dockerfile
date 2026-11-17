@@ -2,7 +2,8 @@ FROM python:3.12-slim AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* && \
+    pip install --no-cache-dir -r requirements.txt && \
     groupadd --system app && useradd --system --gid app --home-dir /app app
 COPY app ./app
 COPY index.html styles.css app.js ./
