@@ -5,7 +5,7 @@
 **Global Solution 2026.2 · CitizenTech · Engenharia de Software 4º ano · Disciplina 6 de 7**  
 **Integrantes e RMs:** Bryan Willian Messias Barbosa (551305); Felipe Terra (99405); Gabriel Doms (98630); Lucas Vassão (98607); Pedro Bicas (99534).  
 **Repositório público:** [GS-Secure-DevOps-Tools-Cloud-Computing](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing) · **MVP publicado:** [PENDENTE após provisionamento]  
-**Data da coleta de custos:** 16/11/2026 · **Status deste documento:** relatório-base; evidências de execução e publicação ainda pendentes.
+**Data da coleta de custos:** 16/11/2026 · **Status:** pipeline CI aprovado e imagem publicada no GHCR; deploy AWS e evidências de observabilidade/custo ainda pendentes.
 
 ## 1. Resumo
 
@@ -54,7 +54,7 @@ O workflow `.github/workflows/devsecops.yml` executa Gitleaks, Semgrep e build a
 
 O pull da imagem GHCR pela instância não autenticada exige tornar o pacote público, ou implementar login temporário com credenciais mínimas no host. A conta AWS também precisa ter o provider OIDC do GitHub ainda não registrado; se já existir, importar/adotar o recurso em vez de criar duplicata. A primeira imagem e infraestrutura precisam ser inicializadas antes de a etapa automática poder operar.
 
-**Evidências a inserir:** [execução que falhou por um segredo de teste sintético, nunca credencial real] · [execução corrigida] · [detalhes dos resultados Gitleaks/Semgrep/Trivy] · [deploy concluído e URL respondendo].
+**Evidências do pipeline:** [execução anterior barrada pelo Trivy](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing/actions/runs/44000597597) · [execução corrigida: Gitleaks, Semgrep, Trivy e publicação GHCR aprovados](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing/actions/runs/44000873548). O deploy AWS foi ignorado porque as variáveis de ambiente do repositório e a infraestrutura ainda não foram configuradas. **Evidência ainda pendente:** deploy concluído e URL pública respondendo.
 
 ## 6. Infraestrutura como código
 
@@ -90,10 +90,10 @@ Fontes: [preços EC2 T3](https://aws.amazon.com/ec2/instance-types/t3/), [preço
 | Critério do enunciado (14 pts) | Entrega preparada | Evidência que falta à equipe |
 |---|---|---|
 | Container e IaC (5,0) | Dockerfile, Compose, Terraform e controles de acesso | Execução real do Compose e apply na conta; atualizar domínio/TLS antes de produção. |
-| Pipeline DevSecOps (4,0) | GitHub Actions com Gitleaks, Semgrep, Trivy, publicação GHCR e base de deploy OIDC/SSM | Repositório conectado, variables/secrets configuradas e captura de run barrado/corrigido. |
+| Pipeline DevSecOps (4,0) | GitHub Actions com Gitleaks, Semgrep, Trivy, publicação GHCR e base de deploy OIDC/SSM | Runs de falha/correção já registrados; falta configurar OIDC/SSM para comprovar deploy automático. |
 | Observabilidade (3,0) | Métricas e regras Prometheus, datasource Grafana | Painel de quatro métricas alimentado pelo MVP publicado e alerta realmente disparado. |
 | Documentação (2,0) | Arquitetura, responsabilidade, LGPD, custo e README | Integrantes/RMs, links finais, URL, capturas e cotação real. |
 
 ## 10. Conclusão
 
-A base de código implementa a cadeia necessária para demonstrar controles DevSecOps e mantém explícita a natureza simulada das previsões. A entrega acadêmica só estará pronta para submissão após preencher nomes e RMs, publicar o repositório, executar e evidenciar pipeline, infraestrutura, URL, dashboard/alerta e custo na região escolhida. Nenhuma captura ou publicação foi fabricada neste relatório-base.
+A base de código implementa a cadeia necessária para demonstrar controles DevSecOps e mantém explícita a natureza simulada das previsões. O repositório e o pipeline já estão publicados; a submissão acadêmica ainda depende de provisionar e evidenciar o MVP, dashboard/alerta e custo na região escolhida. Nenhuma captura de nuvem ou observabilidade foi fabricada neste relatório.

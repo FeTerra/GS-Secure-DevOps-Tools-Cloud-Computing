@@ -1,6 +1,6 @@
 # Ponto Falante — Secure DevOps & Cloud Computing
 
-> **Estado do material:** implementação e configuração local preparadas. A publicação em nuvem, a execução real do pipeline e as capturas de evidência ainda precisam ser feitas na conta e no repositório da equipe. A tela reaproveitada é um protótipo visual; a API implementada expõe previsões didáticas fixas e identificadas como simuladas. Não é integração com a SPTrans.
+> **Estado do material:** repositório publicado e GitHub Actions concluído com Gitleaks, Semgrep, build e Trivy aprovados; a imagem foi publicada no GHCR. O deploy AWS, URL pública do MVP e capturas de monitoramento ainda dependem da conta da equipe. A tela reaproveitada é um protótipo visual; a API expõe previsões didáticas fixas e identificadas como simuladas. Não é integração com a SPTrans.
 
 ## Ficha Técnica do MVP
 
@@ -14,6 +14,8 @@
   - Pedro Bicas — RM 99534
 - URL publicada: **PENDENTE após provisionamento**.
 - Repositório público: https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing
+- Pipeline aprovado: https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing/actions/runs/44000873548
+- Execução anterior barrada pelo Trivy: https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing/actions/runs/44000597597
 - Stack: Python 3.12, FastAPI, Docker, Terraform, AWS EC2, GitHub Actions, Gitleaks, Semgrep, Trivy, Prometheus e Grafana.
 - Dados pessoais: nenhum coletado ou persistido nesta versão. Não há conta, nome, rosto, geolocalização, câmera nem histórico de passageiro.
 - Dados de previsão: fixos e didáticos, sempre etiquetados `simulador`; não usar para deslocamento real.
@@ -55,7 +57,7 @@ Em cada push e pull request, o workflow procura segredos com Gitleaks, executa r
 - Build do Compose e `docker compose ps` com serviços saudáveis.
 - Dockerfile mostrando usuário não-root e ausência de segredos; saída do `docker inspect` sem privilégio root.
 - Terraform plan/apply, console com instância e regra sem SSH/porta administrativa.
-- GitHub Actions: execução bloqueada por segredo sintético e execução corrigida; Gitleaks, Semgrep e Trivy verdes.
+- GitHub Actions: execução anterior barrada na análise Trivy e execução corrigida com Gitleaks, Semgrep, Trivy e publicação GHCR aprovados (links na Ficha Técnica).
 - URL publicada aberta e `/health` respondendo.
 - Dashboard com tráfego, taxa de erro, latência p95 e disponibilidade; alerta realmente disparado.
 - Custo real do Billing Calculator/Cost Explorer, região e período usados.
@@ -70,4 +72,4 @@ Em cada push e pull request, o workflow procura segredos com Gitleaks, executa r
 
 ## Relatório e envio
 
-O relatório-base está em `docs/relatorio-devops.md` e o PDF preparado em `docs/DevOps_Ponto_Falante.pdf`. A identificação do grupo e o link do repositório foram preenchidos; a URL pública do MVP, execuções e capturas de evidência ainda precisam ser adicionadas antes do envio oficial. A disciplina exige PDF único com links clicáveis; o guia geral indica publicação e permanência do MVP por uma semana após 19/11.
+O relatório está em `docs/relatorio-devops.md` e o PDF preparado em `docs/DevOps_Ponto_Falante.pdf`. A identificação, link do repositório e evidências de pipeline foram preenchidos; a URL pública do MVP, infraestrutura publicada e capturas de dashboard/alerta/custo ainda precisam ser adicionadas antes do envio oficial. A disciplina exige PDF único com links clicáveis; o guia geral indica publicação e permanência do MVP por uma semana após 19/11.
