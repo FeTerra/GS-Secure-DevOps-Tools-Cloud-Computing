@@ -1,0 +1,255 @@
+{
+  "url": "https://ponto-falante.y48raqk9mz0k0.us-east-2.cs.amazonlightsail.com/",
+  "region": "us-east-2",
+  "apiStatus": {
+    "modo": "simulador",
+    "token_sptrans_configurado": false,
+    "aviso": "MVP didático: previsões ilustrativas, sem conexão à SPTrans."
+  },
+  "powerCatalog": {
+    "powers": [
+      {
+        "powerId": "nano-1",
+        "price": 7.0,
+        "cpuCount": 0.25,
+        "ramSizeInGb": 0.5,
+        "name": "nano",
+        "isActive": true
+      },
+      {
+        "powerId": "micro-1",
+        "price": 10.0,
+        "cpuCount": 0.25,
+        "ramSizeInGb": 1.0,
+        "name": "micro",
+        "isActive": true
+      },
+      {
+        "powerId": "small-1",
+        "price": 15.0,
+        "cpuCount": 0.5,
+        "ramSizeInGb": 1.0,
+        "name": "small",
+        "isActive": true
+      },
+      {
+        "powerId": "medium-1",
+        "price": 40.0,
+        "cpuCount": 1.0,
+        "ramSizeInGb": 2.0,
+        "name": "medium",
+        "isActive": true
+      },
+      {
+        "powerId": "large-1",
+        "price": 80.0,
+        "cpuCount": 2.0,
+        "ramSizeInGb": 4.0,
+        "name": "large",
+        "isActive": true
+      },
+      {
+        "powerId": "xlarge-1",
+        "price": 160.0,
+        "cpuCount": 4.0,
+        "ramSizeInGb": 8.0,
+        "name": "xlarge",
+        "isActive": true
+      }
+    ]
+  },
+  "service": {
+    "containerServiceName": "ponto-falante",
+    "arn": "arn:aws:lightsail:us-east-2:725631383526:ContainerService/395d56d7-ce5a-4205-8d60-ec204c96d578",
+    "createdAt": "2026-11-17T17:31:53-03:00",
+    "location": {
+      "availabilityZone": "all",
+      "regionName": "us-east-2"
+    },
+    "resourceType": "ContainerService",
+    "tags": [
+      {
+        "key": "Project",
+        "value": "GlobalSolution"
+      }
+    ],
+    "power": "nano",
+    "powerId": "nano-1",
+    "state": "RUNNING",
+    "scale": 1,
+    "currentDeployment": {
+      "version": 1,
+      "state": "ACTIVE",
+      "containers": {
+        "ponto-falante": {
+          "image": "ghcr.io/feterra/gs-secure-devops-tools-cloud-computing:latest",
+          "command": [],
+          "environment": {},
+          "ports": {
+            "8000": "HTTP"
+          }
+        }
+      },
+      "publicEndpoint": {
+        "containerName": "ponto-falante",
+        "containerPort": 8000,
+        "healthCheck": {
+          "healthyThreshold": 2,
+          "unhealthyThreshold": 2,
+          "timeoutSeconds": 5,
+          "intervalSeconds": 30,
+          "path": "/health",
+          "successCodes": "200-299"
+        }
+      },
+      "createdAt": "2026-11-17T17:36:53-03:00"
+    },
+    "isDisabled": false,
+    "principalArn": "arn:aws:iam::044309940796:role/amazon/lightsail/us-east-2/containers/ponto-falante/0m50a85i8obq1s2hgo64u5ehor4j3agi499ks7rudd1o44hpkdk0",
+    "privateDomainName": "ponto-falante.service.local",
+    "url": "https://ponto-falante.y48raqk9mz0k0.us-east-2.cs.amazonlightsail.com/",
+    "privateRegistryAccess": {
+      "ecrImagePullerRole": {
+        "isActive": false,
+        "principalArn": ""
+      }
+    }
+  },
+  "costExplorer": {
+    "ResultsByTime": [
+      {
+        "TimePeriod": {
+          "Start": "2026-11-10",
+          "End": "2026-11-11"
+        },
+        "Total": {
+          "UnblendedCost": {
+            "Amount": "0",
+            "Unit": "USD"
+          }
+        },
+        "Groups": [],
+        "Estimated": true
+      },
+      {
+        "TimePeriod": {
+          "Start": "2026-11-11",
+          "End": "2026-11-12"
+        },
+        "Total": {
+          "UnblendedCost": {
+            "Amount": "0",
+            "Unit": "USD"
+          }
+        },
+        "Groups": [],
+        "Estimated": true
+      },
+      {
+        "TimePeriod": {
+          "Start": "2026-11-12",
+          "End": "2026-11-13"
+        },
+        "Total": {
+          "UnblendedCost": {
+            "Amount": "0",
+            "Unit": "USD"
+          }
+        },
+        "Groups": [],
+        "Estimated": true
+      },
+      {
+        "TimePeriod": {
+          "Start": "2026-11-13",
+          "End": "2026-11-14"
+        },
+        "Total": {
+          "UnblendedCost": {
+            "Amount": "0",
+            "Unit": "USD"
+          }
+        },
+        "Groups": [],
+        "Estimated": true
+      },
+      {
+        "TimePeriod": {
+          "Start": "2026-11-14",
+          "End": "2026-11-15"
+        },
+        "Total": {
+          "UnblendedCost": {
+            "Amount": "0",
+            "Unit": "USD"
+          }
+        },
+        "Groups": [],
+        "Estimated": true
+      },
+      {
+        "TimePeriod": {
+          "Start": "2026-11-15",
+          "End": "2026-11-16"
+        },
+        "Total": {
+          "UnblendedCost": {
+            "Amount": "0",
+            "Unit": "USD"
+          }
+        },
+        "Groups": [],
+        "Estimated": true
+      },
+      {
+        "TimePeriod": {
+          "Start": "2026-11-16",
+          "End": "2026-11-17"
+        },
+        "Total": {
+          "UnblendedCost": {
+            "Amount": "0",
+            "Unit": "USD"
+          }
+        },
+        "Groups": [],
+        "Estimated": true
+      }
+    ],
+    "DimensionValueAttributes": []
+  },
+  "healthCheck": {
+    "status": "ok",
+    "service": "ponto-falante",
+    "fonte": "simulador"
+  },
+  "cpuMetric": {
+    "metricName": "CPUUtilization",
+    "metricData": [
+      {
+        "average": 3.274642139673233,
+        "maximum": 22.302363634109497,
+        "minimum": 0.0,
+        "sampleCount": 0.0,
+        "sum": 0.0,
+        "timestamp": "2026-11-17T17:38:00-03:00",
+        "unit": "Percent"
+      }
+    ]
+  },
+  "memoryMetric": {
+    "metricName": "MemoryUtilization",
+    "metricData": [
+      {
+        "average": 6.013997395833333,
+        "maximum": 7.2265625,
+        "minimum": 0.0,
+        "sampleCount": 0.0,
+        "sum": 0.0,
+        "timestamp": "2026-11-17T17:38:00-03:00",
+        "unit": "Percent"
+      }
+    ]
+  },
+  "collectedAt": "2026-11-17T20:43:25.2166341Z"
+}

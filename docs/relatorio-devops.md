@@ -4,30 +4,30 @@
 
 **Global Solution 2026.2 · CitizenTech · Engenharia de Software 4º ano · Disciplina 6 de 7**  
 **Integrantes e RMs:** Bryan Willian Messias Barbosa (551305); Felipe Terra (99405); Gabriel Doms (98630); Lucas Vassão (98607); Pedro Bicas (99534).  
-**Repositório público:** [GS-Secure-DevOps-Tools-Cloud-Computing](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing) · **MVP publicado:** [PENDENTE após provisionamento]  
-**Data da coleta de custos:** 16/11/2026 · **Status:** pipeline CI aprovado e imagem publicada no GHCR; deploy AWS e evidências de observabilidade/custo ainda pendentes.
+**Repositório público:** [GS-Secure-DevOps-Tools-Cloud-Computing](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing) · **MVP publicado:** [Ponto Falante (HTTPS)](https://ponto-falante.y48raqk9mz0k0.us-east-2.cs.amazonlightsail.com/)  
+**Coleta de evidências:** 17/11/2026 · **Status:** imagem GHCR pública, serviço Lightsail ativo e `/health` validado. O plano gratuito AWS está ativo com créditos promocionais; o Cost Explorer ainda não refletiu a criação de hoje. O alerta gerenciado não está disponível para métricas de containers Lightsail.
 
 ## 1. Resumo
 
-Este trabalho prepara uma entrega DevSecOps para o Ponto Falante, uma CitizenTech voltada à acessibilidade no transporte. A implementação inclui uma aplicação FastAPI com interface web, rotas de saúde/status/pontos/previsões, métricas Prometheus, container não-root, stack local Compose, dashboard provisionado no Grafana, regras de alerta, análise no GitHub Actions e infraestrutura AWS descrita em Terraform. A fonte de previsão desta implementação é fixa e didática; não há conexão SPTrans, autenticação de passageiros ou coleta de dados pessoais. O código e a infraestrutura estão prontos para execução, mas URL pública, saídas reais do pipeline, alerta disparado e custos observados dependem da execução na conta/repositório da equipe. Essas evidências não são simuladas neste relatório.
+O MVP FastAPI está publicado no Amazon Lightsail Container Service, em HTTPS, com imagem pública do GHCR. `/health` retorna `ok`; `/api/status` identifica explicitamente a fonte como simulador e informa que não há conexão SPTrans. Foram coletadas métricas reais de CPU/memória e respostas do Cost Explorer. O serviço usa o power nano (US$ 7/mês de preço de tabela); a conta está no AWS Free plan com créditos, sem ativação de plano pago. Como o Cost Explorer ainda exibe US$ 0 estimados apenas até 16/11, esse valor não representa o custo final do recurso criado em 17/11. O Lightsail Container Service não suporta alarmes/notificações para suas métricas, portanto não existe alerta real anexável nesse serviço. Evidências JSON estão em `docs/evidencias/aws-deploy-snapshot.json`.
 
 ## 2. Arquitetura
 
 ```mermaid
 flowchart LR
-  C[Passageiro / navegador] -->|HTTP demonstração| EC2[EC2: Docker + FastAPI]
-  EC2 -->|/health e /metrics| P[Prometheus local]
+  C[Passageiro / navegador] -->|HTTPS| LS[Lightsail: FastAPI]
+  LS -->|/health e /metrics| P[Prometheus local]
   P --> G[Grafana local: painel e alertas]
   GH[GitHub Actions] --> GL[Gitleaks]
   GH --> SM[Semgrep]
   GH --> TV[Trivy]
-  GH -->|OIDC + SSM| EC2
-  GH -->|imagem versionada| REG[GitHub Container Registry]
-  TF[Terraform] -->|EC2, SG, IAM, volume| EC2
-  U[Usuário da equipe] -->|AWS IAM Identity Center/CLI| TF
+    GH -->|imagem versionada| REG[GitHub Container Registry]
+  REG -->|imagem pública| LS
+  AWS[AWS Free plan · créditos] -->|Lightsail nano · US$ 7/mês| LS
+  U[Usuário da equipe] -->|AWS IAM Identity Center/CLI| AWS
 ```
 
-Prometheus e Grafana são locais e devem apontar para a URL pública do MVP se for necessário observar a instância remota. As métricas da API medem requisições HTTP, duração, taxa de erro derivável por status e disponibilidade do alvo. A regra `MVPIndisponivel` dispara quando `up == 0`; `LatenciaElevada` alerta para p95 superior a 1 s sustentado por cinco minutos. Uma regra configurada não prova que um alerta foi disparado: anexar captura após provocar indisponibilidade controlada.
+Prometheus e Grafana podem ser executados localmente, mas a evidência coletada na nuvem é do painel de métricas do serviço Lightsail. Na coleta real, CPU: média 3,27%, máximo 22,30%; memória: média 6,01%, máximo 7,23% (janela recente retornada pela API). A AWS confirma que alarmes e notificações não são suportados para métricas de container service. As regras Prometheus locais existentes não foram apresentadas como um alerta AWS real nem como disparadas.
 
 ## 3. Segurança e responsabilidade compartilhada
 
@@ -35,65 +35,60 @@ Prometheus e Grafana são locais e devem apontar para a URL pública do MVP se f
 |---|---|
 | Aplicação/container | Dockerfile Python slim, UID não-root, health check; Compose em filesystem somente leitura, `/tmp` temporário, capabilities removidas e `no-new-privileges`. |
 | Pipeline | Gitleaks, Semgrep, Trivy para CVEs HIGH/CRITICAL corrigíveis; workflow em push e pull request; bloqueio de build diante de achados configurados. |
-| Segredos | `.env` ignorado para Grafana local; imagem não inclui credenciais; deploy usa OIDC e IAM temporário. Nunca registrar token real. |
-| Nuvem | Security group permite HTTP/HTTPS e não tem SSH nem porta de administração; volume gp3 criptografado; IMDSv2 obrigatório; SSM para comando remoto. |
+| Segredos | `.env` ignorado para Grafana local; imagem não inclui credenciais. Deploy AWS automático via OIDC está desativado pelo bloqueio da conta. Nunca registrar token real. |
+| Nuvem (MVP implantado) | Lightsail Container Service nano, HTTPS público gerenciado, imagem GHCR pública, escala 1 e health check `/health`. Não há SSH exposto. A arquitetura EC2/Terraform é alternativa documentada e não foi implantada. |
 | Dados/LGPD | Nenhum dado pessoal é solicitado ou persistido. Sem usuário, rosto, localização, gravação de câmera ou conversa armazenada. Logs devem omitir conteúdo da conversa e identificadores. |
-| Limite | A configuração EC2 de demonstração entrega HTTP e não instala certificado TLS. Não usar com dados pessoais/produção antes de configurar domínio, TLS, logs e revisão de segurança. |
+| Limite | O MVP do Lightsail usa HTTPS gerenciado; a alternativa EC2/Terraform de demonstração entrega HTTP e não instala certificado TLS. A API é simulada e não serve para orientar viagem real. |
 
-State do Terraform pode conter metadados de recursos e não deve ser enviado ao Git. Para uso compartilhado, configure backend remoto criptografado e controle de acesso antes do primeiro `apply`.
+O Terraform EC2 permanece como código de referência; não foi aplicado nesta conta. State do Terraform pode conter metadados de recursos e não deve ser enviado ao Git.
 
 ## 4. Container e execução local
 
 Com Docker Desktop instalado, copiar `.env.example` para `.env`, trocar a senha de Grafana, então executar `docker compose up --build -d`. Endpoints de demonstração: `http://localhost:8000`, Grafana em `http://localhost:3000` e Prometheus em `http://localhost:9090`. Grafana e Prometheus são vinculados a `127.0.0.1`. A API serve a interface, documenta a fonte simulada e expõe `/health`, `/api/status`, `/api/pontos`, `/api/pontos/{codigo}/previsoes` e `/metrics`.
 
-**Evidência a inserir:** [captura real de `docker compose ps`] · [captura de `docker inspect` mostrando usuário não-root e portas] · [captura de `/health` e origem simulada na interface].
+A configuração e segurança local do container estão descritas no Dockerfile e Compose; a execução real documentada neste relatório é a imagem publicada no Lightsail. Respostas reais de `/health` e `/api/status` foram anexadas em `docs/evidencias/aws-deploy-snapshot.json`.
 
 ## 5. Pipeline de segurança e publicação
 
-O workflow `.github/workflows/devsecops.yml` executa Gitleaks, Semgrep e build a cada push/PR; Trivy bloqueia achados CRITICAL/HIGH. No push para `main`, publica a imagem no GHCR, assume uma role AWS via OIDC e solicita atualização EC2 usando SSM. A confiança OIDC é limitada ao `owner/repo` e à branch `main`. É necessário configurar `AWS_DEPLOY_ROLE_ARN` como GitHub Secret, e `AWS_REGION`/`EC2_INSTANCE_ID` como variáveis do repositório. A role e a instância são criadas pelo Terraform.
+O workflow `.github/workflows/devsecops.yml` executa Gitleaks, Semgrep e build a cada push/PR; Trivy bloqueia achados CRITICAL/HIGH. No push para `main`, publica a imagem no GHCR. O deploy automático foi mantido desativado: a política gerenciada da conta AWS de projeto nega a criação de provedores IAM OIDC (`iam:*Provider*`), requisito do fluxo Terraform/GitHub. Habilitar recursos avançados exige migrar a conta para o plano pago, o que não foi feito. A publicação em produção desta entrega foi manual via sessão temporária local da equipe, sem chave AWS persistente no GitHub.
 
-O pull da imagem GHCR pela instância não autenticada exige tornar o pacote público, ou implementar login temporário com credenciais mínimas no host. A conta AWS também precisa ter o provider OIDC do GitHub ainda não registrado; se já existir, importar/adotar o recurso em vez de criar duplicata. A primeira imagem e infraestrutura precisam ser inicializadas antes de a etapa automática poder operar.
+A imagem do GHCR está pública e foi consumida pelo Lightsail. As permissões da conta de projeto negaram a criação do provedor IAM OIDC exigido pela automação; não se habilitou o plano pago nem se gravaram credenciais AWS de longa duração como secrets do GitHub.
 
-**Evidências do pipeline:** [execução anterior barrada pelo Trivy](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing/actions/runs/44000597597) · [execução corrigida: Gitleaks, Semgrep, Trivy e publicação GHCR aprovados](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing/actions/runs/44000873548). O deploy AWS foi ignorado porque as variáveis de ambiente do repositório e a infraestrutura ainda não foram configuradas. **Evidência ainda pendente:** deploy concluído e URL pública respondendo.
+**Evidências do pipeline:** [execução anterior barrada pelo Trivy](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing/actions/runs/44000597597) · [execução corrigida: Gitleaks, Semgrep, Trivy e publicação GHCR aprovados](https://github.com/FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing/actions/runs/44000873548). O job automático de deploy continua ignorado por não haver role OIDC elegível nessa conta. O MVP foi publicado manualmente no Lightsail e validado na URL acima; os detalhes e snapshots estão em `docs/evidencias/aws-deploy-snapshot.json`.
 
 ## 6. Infraestrutura como código
 
-Terraform provisiona VPC, subnet pública, rota e Internet Gateway, Amazon Linux 2023, EC2 `t3.micro`, volume raiz gp3 de 20 GiB criptografado, security group sem SSH, perfil EC2 limitado ao SSM e role GitHub OIDC com permissão de envio de comando à instância tagged `Project=GlobalSolution`. O user-data instala Docker e inicia a imagem. Saída da infraestrutura: URL pública HTTP e ID da instância.
+O Terraform do repositório descreve uma arquitetura EC2 com OIDC/SSM, mas ela não pôde ser aplicada nessa conta por bloqueio de SCP na criação do provider OIDC. Para entregar uma URL funcional sem ativar plano pago, o MVP foi publicado manualmente em um Lightsail Container Service `ponto-falante`, região `us-east-2`, power nano, escala 1, imagem GHCR pública, porta HTTP 8000 no container e health check `/health`. O endpoint público do Lightsail termina HTTPS automaticamente. O snapshot de estado está em `docs/evidencias/aws-deploy-snapshot.json`.
 
-Comandos, após revisar região, imagem e repositório no `terraform.tfvars`: `terraform init`, `terraform plan`, revisar mudanças/custo e `terraform apply`. Após demonstração, `terraform destroy` encerra recursos. **Não execute `apply` sem revisar plano e credenciais da própria equipe.**
-
-**Evidências a inserir:** [plan/apply] · [security group sem 22/3389 e sem porta de monitoramento pública] · [instância e URL funcionando].
+A infraestrutura EC2 descrita em `terraform/` não foi aplicada: a política AWS da conta de projeto bloqueia o provider OIDC e não fizemos upgrade para o plano pago. A implantação comprovada é o Lightsail descrito acima. **Não há evidência de `terraform plan/apply` nem de instância EC2.**
 
 ## 7. Observabilidade
 
-Dashboard deve apresentar quatro métricas de ouro: latência p95, taxa de erro HTTP, taxa/volume de requisições e disponibilidade. Configure painel no Grafana usando PromQL; regra de indisponibilidade e regra de latência estão em `monitoring/alerts.yml`. O alerta será considerado demonstrado somente quando houver evidência de estado disparado no Prometheus/Grafana.
-
-**Evidências a inserir:** [dashboard de 4 métricas com dados da aplicação] · [alerta disparado e resolvido] · [Prometheus apontando para a URL publicada].
+O dashboard real do Lightsail fornece CPU e memória do serviço. Na coleta de 17/11/2026: CPU média 3,27% e pico 22,30%; memória média 6,01% e pico 7,23%. A aplicação também expõe `/metrics` para Prometheus local. O Lightsail Container Service não aceita alarmes ou notificações de CPU/memória; por isso não há alerta real nesse serviço. Não foi criada infraestrutura adicional de monitoramento que consuma créditos. Fonte: [documentação oficial de métricas de containers Lightsail](https://docs.aws.amazon.com/lightsail/latest/userguide/amazon-lightsail-viewing-container-services-metrics.html). A captura/saída estruturada da consulta está no snapshot JSON.
 
 ## 8. Estimativa de custo
 
-Estimativa mensal de referência para 730 horas, uma EC2 `t3.micro`, 20 GB gp3 e um IPv4 público. Os preços base abaixo são referências públicas da AWS consultadas em 16/11/2026; região, impostos, franquia, tráfego e elegibilidade de Free Tier alteram a fatura. A página AWS de T3 lista US$ 0,0104/h para `t3.micro`; IPv4 em uso custa US$ 0,005/h; gp3 é US$ 0,08/GB-mês.
+O recurso publicado usa o plano Lightsail Container Service `nano`, cujo preço de tabela retornado pela API AWS é US$ 7/mês para 0,25 vCPU e 0,5 GB RAM. A conta AWS estava no plano gratuito com US$ 100 em créditos promocionais e 182 dias restantes na coleta; portanto, o recurso consome créditos do plano enquanto elegível, sem upgrade para plano pago. O saldo corrente deve ser confirmado em Billing & Cost Management. O Cost Explorer consultado em 17/11 retornou US$ 0 estimados por dia somente até 16/11; o lançamento do serviço no mesmo dia ainda não estava refletido. Esse snapshot defasado não prova custo final de US$ 0.
 
-| Item | Conta ilustrativa | USD/mês |
+| Item | Referência | USD/mês |
 |---|---:|---:|
-| EC2 t3.micro | 730 h × US$ 0,0104 | 7,59 |
-| IPv4 público | 730 h × US$ 0,005 | 3,65 |
-| Volume gp3 de 20 GB | 20 × US$ 0,08 | 1,60 |
-| **Subtotal de referência** | sem impostos, saída de dados, DNS, TLS pago ou monitoramento AWS | **12,84** |
+| Lightsail Container Service nano | 1 nó, preço retornado pela API `get-container-service-powers` | 7,00 |
+| Cost Explorer | Consulta diária; dados estimados/defasados até 16/11/2026 | 0,00 exibido (não inclui lançamento posterior) |
+| **Custo recorrente de tabela** | Não inclui impostos/uso excedente; crédito promocional pode cobrir cobrança elegível | **7,00** |
 
-Este subtotal usa preço de referência, não uma cotação garantida para sa-east-1. Antes do envio, substituir por estimativa da região escolhida no AWS Pricing Calculator e anexar captura ou fatura do Cost Explorer. Instância ligada depois da apresentação continua cobrando; destruir recursos ao concluir.
+Créditos promocionais reduzem desembolso enquanto disponíveis, mas não tornam a execução sem custo econômico. O snapshot real do Cost Explorer e do catálogo de preços está junto das evidências. O plano gratuito pode encerrar/fechar a conta no consumo dos créditos ou fim do prazo; não selecionar upgrade pago. O serviço permanece ativo e pode consumir créditos mês a mês.
 
-Fontes: [preços EC2 T3](https://aws.amazon.com/ec2/instance-types/t3/), [preços de IPv4 público](https://aws.amazon.com/vpc/pricing/), [preços EBS gp3](https://aws.amazon.com/ebs/general-purpose/).
+Fonte: API AWS `lightsail get-container-service-powers` consultada em 17/11/2026; condições do plano/créditos em Billing & Cost Management. O Cost Explorer ainda não incorporava o recurso novo na coleta.
 
 ## 9. Matriz de aderência à rubrica
 
 | Critério do enunciado (14 pts) | Entrega preparada | Evidência que falta à equipe |
 |---|---|---|
-| Container e IaC (5,0) | Dockerfile, Compose, Terraform e controles de acesso | Execução real do Compose e apply na conta; atualizar domínio/TLS antes de produção. |
-| Pipeline DevSecOps (4,0) | GitHub Actions com Gitleaks, Semgrep, Trivy, publicação GHCR e base de deploy OIDC/SSM | Runs de falha/correção já registrados; falta configurar OIDC/SSM para comprovar deploy automático. |
-| Observabilidade (3,0) | Métricas e regras Prometheus, datasource Grafana | Painel de quatro métricas alimentado pelo MVP publicado e alerta realmente disparado. |
-| Documentação (2,0) | Arquitetura, responsabilidade, LGPD, custo e README | Integrantes/RMs, links finais, URL, capturas e cotação real. |
+| Container e IaC (5,0) | Dockerfile, Compose, Terraform e MVP ativo no Lightsail | Registro real de deploy via serviço gerenciado; não é evidência de `terraform apply` da arquitetura EC2. |
+| Pipeline DevSecOps (4,0) | GitHub Actions com Gitleaks, Semgrep, Trivy e publicação GHCR | Deploy automático OIDC não habilitado por SCP da conta; publicação no Lightsail foi manual. |
+| Observabilidade (3,0) | Métricas Lightsail reais de CPU/memória e endpoint `/metrics` | Alerta não suportado para métricas de container Lightsail; regra Prometheus local não está sendo alegada como alerta real. |
+| Documentação (2,0) | Arquitetura, responsabilidade, LGPD, custo, URL e evidências JSON | Anexar captura visual do console se a rubrica exigir screenshots; Cost Explorer atualiza com atraso. |
 
 ## 10. Conclusão
 
-A base de código implementa a cadeia necessária para demonstrar controles DevSecOps e mantém explícita a natureza simulada das previsões. O repositório e o pipeline já estão publicados; a submissão acadêmica ainda depende de provisionar e evidenciar o MVP, dashboard/alerta e custo na região escolhida. Nenhuma captura de nuvem ou observabilidade foi fabricada neste relatório.
+O MVP está acessível em HTTPS e seu health check foi validado; CPU/memória reais foram coletados na AWS, e o relatório registra o preço de tabela e a leitura defasada do Cost Explorer. O deploy automático GitHub→AWS permaneceu desligado por bloqueio IAM/OIDC da conta gratuita, sem upgrade para plano pago. Também não há alarme real de container, pois o Lightsail não oferece essa função. O MVP é didático e suas previsões não vêm da SPTrans; deixe isso claro na apresentação. Os snapshots anexados são respostas reais da AWS e da API no horário indicado, não capturas de tela fabricadas.

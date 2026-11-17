@@ -20,14 +20,14 @@ class Architecture(Flowable):
         super().__init__(); self.width = 170*mm; self.height = 70*mm
     def draw(self):
         d = Drawing(self.width, self.height)
-        nodes = [(3,47,44,16,"Navegador"),(59,47,50,16,"EC2 · FastAPI"),(121,47,48,16,"Prometheus · Grafana"),(3,8,44,16,"GitHub Actions"),(55,8,61,16,"Gitleaks · Semgrep · Trivy"),(125,8,44,16,"GHCR · imagem")]
+        nodes = [(3,47,44,16,"Navegador"),(59,47,50,16,"Lightsail · FastAPI"),(121,47,48,16,"Métricas CPU/memória"),(3,8,44,16,"GitHub Actions"),(55,8,61,16,"Gitleaks · Semgrep · Trivy"),(125,8,44,16,"GHCR · imagem")]
         for x,y,w,h,label in nodes:
             d.add(Rect(x*mm,y*mm,w*mm,h*mm,rx=3,ry=3,fillColor=PALE,strokeColor=TEAL,strokeWidth=1.2))
             d.add(String((x+w/2)*mm,(y+h/2)*mm-3,label,textAnchor="middle",fontName="Helvetica",fontSize=7.3,fillColor=NAVY))
         def arrow(x1,y1,x2,y2):
             d.add(Line(x1*mm,y1*mm,x2*mm,y2*mm,strokeColor=TEAL,strokeWidth=1.1))
             d.add(Polygon([x2*mm,y2*mm,x2*mm-3,y2*mm+2,x2*mm-3,y2*mm-2],fillColor=TEAL,strokeColor=TEAL))
-        arrow(47,55,59,55); arrow(109,55,121,55); arrow(47,16,55,16); arrow(116,16,125,16); arrow(83,24,83,45); arrow(147,24,99,47)
+        arrow(47,55,59,55); arrow(109,55,121,55); arrow(47,16,55,16); arrow(116,16,125,16); arrow(99,16,99,47); arrow(147,24,99,47)
         d.drawOn(self.canv,0,0)
 
 def clean(s):
