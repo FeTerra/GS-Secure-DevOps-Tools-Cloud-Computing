@@ -22,7 +22,7 @@ resource "aws_vpc" "app" {
   cidr_block           = "10.42.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags = { Name = "ponto-falante-vpc" }
+  tags                 = { Name = "ponto-falante-vpc" }
 }
 
 resource "aws_subnet" "public" {
@@ -30,12 +30,12 @@ resource "aws_subnet" "public" {
   cidr_block              = "10.42.1.0/24"
   availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
-  tags = { Name = "ponto-falante-public" }
+  tags                    = { Name = "ponto-falante-public" }
 }
 
 resource "aws_internet_gateway" "app" {
   vpc_id = aws_vpc.app.id
-  tags = { Name = "ponto-falante-igw" }
+  tags   = { Name = "ponto-falante-igw" }
 }
 
 resource "aws_route_table" "public" {
@@ -86,9 +86,9 @@ resource "aws_iam_role" "ec2_ssm" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Service = "ec2.amazonaws.com" }
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
@@ -143,9 +143,9 @@ resource "aws_iam_role" "github_deploy" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
-      Action = "sts:AssumeRoleWithWebIdentity"
+      Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = { StringEquals = {
         "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:ref:refs/heads/main"

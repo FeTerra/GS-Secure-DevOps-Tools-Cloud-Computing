@@ -1,6 +1,6 @@
 variable "aws_region" {
   type    = string
-  default = "us-east-1"
+  default = "us-east-2"
 }
 
 variable "instance_type" {
@@ -9,13 +9,13 @@ variable "instance_type" {
 }
 
 variable "image_uri" {
-  description = "Imagem pública publicada no GHCR; altere pelo nome do seu repositório."
+  description = "Imagem publicada no GHCR pelo workflow deste repositório."
   type        = string
-  default     = "ghcr.io/SEU-USUARIO/ponto-falante:latest"
+  default     = "ghcr.io/feterra/gs-secure-devops-tools-cloud-computing:latest"
 }
 
 variable "github_repository" {
   description = "owner/repo exato usado no sub do OIDC GitHub."
   type        = string
-  default     = "SEU-USUARIO/ponto-falante"
+  default     = "FeTerra/GS-Secure-DevOps-Tools-Cloud-Computing"
 }
