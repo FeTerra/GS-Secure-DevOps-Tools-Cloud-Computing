@@ -2,7 +2,7 @@ groups:
   - name: ponto-falante
     rules:
       - alert: MVPIndisponivel
-        expr: up{job="ponto-falante"} == 0
+        expr: up{job="ponto-falante-local"} == 0
         for: 1m
         labels: {severity: critical}
         annotations:

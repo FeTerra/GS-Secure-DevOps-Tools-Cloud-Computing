@@ -3,7 +3,12 @@ global:
   evaluation_interval: 15s
 scrape_configs:
   - job_name: ponto-falante
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ponto-falante.y48raqk9mz0k0.us-east-2.cs.amazonlightsail.com:443]
+  - job_name: ponto-falante-local
     metrics_path: /metrics
     static_configs:
       - targets: [app:8000]
-rule_files: [/etc/prometheus/alerts.yml]
+rule_files: [alerts.yml]

@@ -1,0 +1,48 @@
+{
+  "collectedAt": "2026-11-17T21:54:31.667296+00:00",
+  "environment": "Local Windows Prometheus/Grafana scraping the public Lightsail endpoint over HTTPS; no additional AWS service created",
+  "publicMvp": "https://ponto-falante.y48raqk9mz0k0.us-east-2.cs.amazonlightsail.com",
+  "prometheus": "http://127.0.0.1:9090",
+  "grafana": "http://127.0.0.1:3000/d/ponto-falante-ouro/ponto-falante-sinais-de-ouro",
+  "scrapeTarget": {
+    "job": "ponto-falante",
+    "instance": "ponto-falante.y48raqk9mz0k0.us-east-2.cs.amazonlightsail.com:443",
+    "scheme": "https",
+    "path": "/metrics"
+  },
+  "dashboardPanels": [
+    "Public availability",
+    "Public request rate",
+    "Public HTTP error rate 4xx/5xx",
+    "Public latency p95"
+  ],
+  "trafficTest": {
+    "description": "Controlled synthetic traffic; GET /health (200) and a non-existent route (404), not passenger traffic",
+    "note": "Prometheus rates use a rolling five-minute window over counters from the public container. The window includes controlled synthetic 404 tests, health checks and prior validation requests; it is not representative passenger traffic."
+  },
+  "measurements": {
+    "availability": 1.0,
+    "requestsPerSecond": 0.311864406779661,
+    "httpErrorRate": 0.2608695652173913,
+    "p95LatencySeconds": 0.004749999999999999,
+    "localTargetAvailability": 1.0
+  },
+  "sampleTimesUtc": {
+    "availability": "2026-11-17T21:54:31.645000+00:00",
+    "requestsPerSecond": "2026-11-17T21:54:31.650000+00:00",
+    "httpErrorRate": "2026-11-17T21:54:31.655000+00:00",
+    "p95LatencySeconds": "2026-11-17T21:54:31.660000+00:00",
+    "localTargetAvailability": "2026-11-17T21:54:31.664000+00:00"
+  },
+  "alertTest": {
+    "name": "MVPIndisponivel",
+    "testTarget": "Local probe at 127.0.0.1:8001 was temporarily unreachable; public Lightsail endpoint remained online",
+    "for": "1m",
+    "firingObservedUtc": "2026-11-17T21:56:22.387+00:00",
+    "recovery": "Restored local probe target to 127.0.0.1:8000; clean Prometheus TSDB confirmed local and public targets up=1 with no firing series",
+    "recoveryConfirmedUtc": "2026-11-17T21:56:59.961+00:00",
+    "awsAlarm": "Prometheus local alert rule only; AWS Lightsail Container Service metrics do not support alarms/notifications.",
+    "firingScreenshot": "docs/evidencias/alerta-prometheus-firing.png",
+    "dashboardScreenshot": "docs/evidencias/dashboard-grafana-publico.png"
+  }
+}

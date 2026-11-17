@@ -24,8 +24,11 @@ jobs:
         run: terraform fmt -check -recursive
       - name: Inicializar provider sem backend
         run: terraform init -backend=false -input=false
-      - name: Validar configuração
+      - name: Validar configuração EC2 de referência
         run: terraform validate -no-color
+      - name: Validar módulo Terraform do Lightsail publicado
+        working-directory: terraform/lightsail-live
+        run: terraform init -backend=false -input=false && terraform validate -no-color
 
   security-build:
     runs-on: ubuntu-latest

@@ -6,7 +6,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Preformatted, Flowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Preformatted, Flowable, PageBreak
 from reportlab.graphics.shapes import Drawing, Rect, String, Line, Polygon
 
 BASE = Path(__file__).resolve().parents[1]
@@ -64,7 +64,9 @@ while i<len(lines):
     if line.startswith("# "):
         if not started: started=True; i+=1; continue
         story.append(Paragraph(clean(line[2:]),styles["H1PF"]))
-    elif line.startswith("## "): story.append(Paragraph(clean(line[3:]),styles["H1PF"]))
+    elif line.startswith("## "):
+        if line.startswith("## 7. Observabilidade"): story.append(PageBreak())
+        story.append(Paragraph(clean(line[3:]),styles["H1PF"]))
     elif line.startswith("### "): story.append(Paragraph(clean(line[4:]),styles["H2PF"]))
     elif line.startswith("```"):
         if not in_code: in_code=True; code=[]
